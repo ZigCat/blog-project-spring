@@ -18,8 +18,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/user")
@@ -58,6 +61,16 @@ public class AppUserController {
         } catch (NoSuchElementException e){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<AppUser>> searchByNickname(@RequestParam String search){
+        List<AppUser> users = repository.findAll();
+        List<AppUser> sortedResults = users.stream()
+                .filter(item -> item.getNickname().toLowerCase().contains(search.toLowerCase()))
+                .sorted(Comparator.comparing(item -> item.getNickname().equalsIgnoreCase(search) ? 0 : 1))
+                .toList();
+        return new ResponseEntity(sortedResults, HttpStatus.OK);
     }
 
     @GetMapping("/login")
